@@ -6,13 +6,17 @@ Enable users to create, edit, and delete tasks seamlessly.
 Categorize tasks by priority, deadlines, and custom labels.
 Provide progress tracking and reminders for upcoming deadlines.
 Offer an intuitive, user-friendly interface for enhanced productivity.
+
 Features
+
 Task Creation & Editing: Add tasks with titles, descriptions, deadlines, and priorities.
 Categories & Labels: Organize tasks using custom categories and tags.
 Progress Tracking: Mark tasks as "In Progress," "Completed," or "Pending."
 Reminders: Notify users of impending deadlines.
 Dark Mode: Switch between light and dark themes for a better user experience.
+
 Prerequisites
+
 Tools and Libraries
 Frontend: React.js
 Backend: Node.js, Express.js
