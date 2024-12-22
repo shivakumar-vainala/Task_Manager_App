@@ -1,91 +1,143 @@
-Task Manager App
-This repository implements a robust task management application designed to help users organize, prioritize, and track their daily tasks effectively. The application offers features such as task creation, categorization, deadline management, and progress tracking.
+package TaskManagerApp;
 
-Objectives
-Enable users to create, edit, and delete tasks seamlessly.
-Categorize tasks by priority, deadlines, and custom labels.
-Provide progress tracking and reminders for upcoming deadlines.
-Offer an intuitive, user-friendly interface for enhanced productivity.
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
-Features
+interface Noteable {
+    void createNote();
+    void editNote();
+}
 
-Task Creation & Editing: Add tasks with titles, descriptions, deadlines, and priorities.
-Categories & Labels: Organize tasks using custom categories and tags.
-Progress Tracking: Mark tasks as "In Progress," "Completed," or "Pending."
-Reminders: Notify users of impending deadlines.
-Dark Mode: Switch between light and dark themes for a better user experience.
+class AuthenticationFailedException extends Exception {
+    public AuthenticationFailedException(String message) {
+        super(message);
+    }
+}
 
-Prerequisites
+class User {
+    private String username;
+    private String password;
 
-Tools and Libraries
-Frontend: React.js
-Backend: Node.js, Express.js
-Database: MongoDB
-Other: Axios, JWT for authentication, Material-UI for styling
-Installation
-Clone the Repository:
-bash
-Copy code
-git clone https://github.com/your-username/task-manager-app.git  
-cd task-manager-app  
-Install Dependencies:
-bash
-Copy code
-# Install server dependencies  
-cd backend  
-npm install  
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
-# Install client dependencies  
-cd ../frontend  
-npm install  
-Run the Application:
-bash
-Copy code
-# Start the backend server  
-cd backend  
-npm start  
+    public User() {
+        this.username = "xyz";
+        this.password = "abcd";
+    }
 
-# Start the frontend application  
-cd ../frontend  
-npm start  
-Project Structure
-java
-Copy code
-task-manager-app/  
-├── backend/  
-│   ├── controllers/  
-│   ├── models/  
-│   ├── routes/  
-│   ├── server.js  
-│   ├── config/  
-├── frontend/  
-│   ├── src/  
-│   │   ├── components/  
-│   │   ├── pages/  
-│   │   ├── utils/  
-│   ├── public/  
-│   ├── package.json  
-├── README.md  
-├── package.json  
-Usage
-Adding a Task:
-Navigate to the "Add Task" page.
-Fill in the task details, such as title, description, deadline, and priority.
-Click Save to add the task.
-Tracking Progress:
-Go to the "Task List" page.
-Use filters to view tasks by status or deadline.
-Update task status as "In Progress" or "Completed."
-Results
-Efficiency Boost: Reduces task management time by XX%.
-User Base: Successfully onboarded XX users during beta testing.
-Performance: The app supports concurrent users with minimal latency.
-Future Work
-Implement recurring task functionality.
-Add calendar integration for deadline syncing.
-Develop a mobile app version for iOS and Android platforms.
-Incorporate AI-based task suggestions.
-Acknowledgments
-Open-source libraries and frameworks used in the project.
-Beta testers for their valuable feedback.
-Mentors and team members for their continuous support.
+    public boolean authenticateUser(String inputPassword) throws AuthenticationFailedException {
+        if (!this.password.equals(inputPassword)) {
+            throw new AuthenticationFailedException("Authentication failed.");
+        }
+        return true;
+    }
+}
+
+class Task {
+    protected String taskName;
+    protected int priority;
+
+    public Task(String taskName, int priority) {
+        this.taskName = taskName;
+        this.priority = priority;
+    }
+}
+
+class ImportantTask extends Task {
+    private boolean isUrgent;
+
+    public ImportantTask(String taskName, int priority, boolean isUrgent) {
+        super(taskName, priority);
+        this.isUrgent = isUrgent;
+    }
+}
+
+class SimpleNote implements Noteable {
+    private String title;
+    private String content;
+
+    public SimpleNote(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    @Override
+    public void createNote() {
+        System.out.println("Note created: " + title);
+    }
+
+    @Override
+    public void editNote() {
+        System.out.println("Editing note: " + title);
+    }
+}
+
+final class PasswordManager {
+    private static List<String> savedPasswords = new ArrayList<>();
+
+    public static void addPassword(String password) {
+        savedPasswords.add(password);
+    }
+}
+
+public class TaskManagerApp {
+    public static void main(String[] args) {
+        User user = new User("johnDoe", "password123");
+
+        int retryCount = 3;
+        boolean isAuthenticated = false;
+
+        while (retryCount > 0 && !isAuthenticated) {
+            try {
+                isAuthenticated = user.authenticateUser("wrongPassword");
+                System.out.println("User authenticated successfully.");
+            } catch (AuthenticationFailedException e) {
+                System.err.println(e.getMessage() + " Attempts remaining: " + (--retryCount));
+                if (retryCount == 0) {
+                    System.err.println("Access denied. Exiting application.");
+                    System.exit(1);
+                }
+            }
+        }
+
+        ImportantTask task = new ImportantTask("Task 1", 2, true);
+
+        if (task.priority < 1 || task.priority > 5) {
+            System.err.println("Task priority must be between 1 and 5.");
+        } else {
+            System.out.println("Task created with valid priority.");
+        }
+
+        Noteable note = new SimpleNote("Important Note", "This is an important note.");
+        note.createNote();
+
+        PasswordManager.addPassword("mySecurePassword");
+
+        Thread taskThread = new Thread(() -> {
+            System.out.println("Task management thread running...");
+        });
+        taskThread.start();
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("task.txt"));
+            writer.write(task.taskName);
+            writer.newLine();
+            writer.write(String.valueOf(task.priority));
+            writer.close();
+
+            BufferedReader reader = new BufferedReader(new FileReader("task.txt"));
+            String readTaskName = reader.readLine();
+            int readPriority = Integer.parseInt(reader.readLine());
+            reader.close();
+
+            System.out.println("Task Read from File: " + readTaskName + ", Priority: " + readPriority);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
